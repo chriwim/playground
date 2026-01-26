@@ -8,7 +8,30 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#333333">
     <title>Kids Drawing App</title>
-    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiS2lkcyBEcmF3aW5nIEFwcCIsInNob3J0X25hbWUiOiJEcmF3IiwiZGlzcGxheSI6ImZ1bGxzY3JlZW4iLCJzdGFydF91cmwiOiIuIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmMGYwZjAiLCJ0aGVtZV9jb2xvciI6IiMzMzMzMzMifQ==">
+    <link rel="manifest" id="manifest">
+    <script>
+        const manifest = {
+            "name": "Kids Drawing App",
+            "short_name": "Draw",
+            "display": "standalone",
+            "orientation": "any",
+            "start_url": window.location.href,
+            "scope": "/",
+            "background_color": "#f0f0f0",
+            "theme_color": "#333333",
+            "icons": [
+                {
+                    "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%23333' width='512' height='512'/%3E%3Cpath fill='%23fff' d='M256 80l-40 120h-120l96 72-36 128 100-76 100 76-36-128 96-72h-120z'/%3E%3C/svg%3E",
+                    "sizes": "512x512",
+                    "type": "image/svg+xml",
+                    "purpose": "any maskable"
+                }
+            ]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        document.getElementById('manifest').setAttribute('href', manifestURL);
+    </script>
     <style>
         * {
             margin: 0;
