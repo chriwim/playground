@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    <title>My Web Apps</title>
+    <link rel="manifest" id="manifest">
+    <script>
+        const manifest = {
+            "name": "My Web Apps",
+            "short_name": "Apps",
+            "display": "standalone",
+            "orientation": "any",
+            "start_url": "./",
+            "scope": "./",
+            "background_color": "#667eea",
+            "theme_color": "#667eea",
+            "icons": [
+                {
+                    "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23667eea;stop-opacity:1'/%3E%3Cstop offset='100%25' style='stop-color:%23764ba2;stop-opacity:1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23grad)' width='512' height='512'/%3E%3Ctext x='256' y='320' font-size='280' text-anchor='middle' fill='%23fff'%3E🎮%3C/text%3E%3C/svg%3E",
+                    "sizes": "512x512",
+                    "type": "image/svg+xml",
+                    "purpose": "any maskable"
+                }
+            ]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        document.getElementById('manifest').setAttribute('href', manifestURL);
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: white;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            margin-bottom: 40px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            max-width: 800px;
+            width: 100%;
+            list-style: none;
+        }
+
+        .app-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .app-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.2);
+        }
+
+        .app-card:active {
+            transform: scale(0.98);
+        }
+
+        .app-icon {
+            font-size: clamp(3rem, 8vw, 5rem);
+            margin-bottom: 16px;
+        }
+
+        .app-name {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            color: #667eea;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .apps-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 My Web Apps 🎮</h1>
+    <ul class="apps-grid">
+        <li>
+            <a href="animal-sounds/index.html" class="app-card">
+                <div class="app-icon">🐕</div>
+                <div class="app-name">Animal Sounds</div>
+            </a>
+        </li>
+        <li>
+            <a href="drawing/index.html" class="app-card">
+                <div class="app-icon">🎨</div>
+                <div class="app-name">Drawing</div>
+            </a>
+        </li>
+    </ul>
+</body>
+</html>
