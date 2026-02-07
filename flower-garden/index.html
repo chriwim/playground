@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link id="manifest" rel="manifest" href="">
+    <title>Flower Garden</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: system-ui, -apple-system, sans-serif;
+            touch-action: none;
+        }
+
+        #garden {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: linear-gradient(to bottom, 
+                #87CEEB 0%, 
+                #87CEEB 60%, 
+                #90EE90 60%, 
+                #7CCD7C 100%);
+            cursor: pointer;
+        }
+
+        /* Grass texture effect */
+        #garden::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background-image: 
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(34, 139, 34, 0.1) 2px,
+                    rgba(34, 139, 34, 0.1) 4px
+                ),
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(34, 139, 34, 0.15) 10px,
+                    rgba(34, 139, 34, 0.15) 11px
+                );
+            pointer-events: none;
+        }
+
+        .flower {
+            position: absolute;
+            font-size: 0px;
+            cursor: pointer;
+            transform-origin: bottom center;
+            animation: grow 0.6s ease-out forwards;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        @keyframes grow {
+            0% {
+                font-size: 0px;
+                transform: translateY(20px) scale(0);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                font-size: 48px;
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes disappear {
+            0% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        .flower.removing {
+            animation: disappear 0.4s ease-in forwards;
+        }
+
+        .flower:active {
+            transform: scale(0.9);
+        }
+
+        /* Sun in the sky */
+        .sun {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            font-size: 60px;
+            animation: sunshine 3s ease-in-out infinite alternate;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        @keyframes sunshine {
+            0% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+            100% {
+                transform: scale(1.1);
+                filter: brightness(1.2);
+            }
+        }
+
+        /* Clouds */
+        .cloud {
+            position: absolute;
+            font-size: 40px;
+            opacity: 0.8;
+            pointer-events: none;
+            user-select: none;
+            animation: float 60s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateX(-100px);
+            }
+            100% {
+                transform: translateX(calc(100vw + 100px));
+            }
+        }
+        
+        @keyframes cloudAppear {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            100% {
+                opacity: 0.8;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes cloudDrift {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(calc(100vw + 100px));
+            }
+        }
+
+        .cloud:nth-child(2) {
+            top: 80px;
+            animation-duration: 80s;
+            animation-delay: -30s;
+        }
+
+        .cloud:nth-child(3) {
+            top: 140px;
+            animation-duration: 100s;
+            animation-delay: -60s;
+        }
+
+        @media (max-width: 600px) {
+            .flower {
+                animation: grow 0.6s ease-out forwards;
+            }
+            
+            @keyframes grow {
+                100% {
+                    font-size: 40px;
+                }
+            }
+            
+            .sun {
+                font-size: 50px;
+                top: 20px;
+                right: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="garden">
+        <div class="sun">☀️</div>
+        <div class="cloud" style="top: 50px;">☁️</div>
+        <div class="cloud">☁️</div>
+        <div class="cloud">☁️</div>
+    </div>
+
+    <script>
+        // PWA Manifest Setup
+        const manifest = {
+            "name": "Flower Garden",
+            "short_name": "Garden",
+            "display": "standalone",
+            "orientation": "any",
+            "start_url": "./",
+            "scope": "./",
+            "background_color": "#87CEEB",
+            "theme_color": "#87CEEB",
+            "icons": [{
+                "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%2387CEEB' width='512' height='512'/%3E%3Ctext x='256' y='280' font-size='300' text-anchor='middle' dominant-baseline='central'%3E🌸%3C/text%3E%3C/svg%3E",
+                "sizes": "512x512",
+                "type": "image/svg+xml",
+                "purpose": "any maskable"
+            }]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        document.getElementById('manifest').setAttribute('href', manifestURL);
+
+        const garden = document.getElementById('garden');
+        const flowerEmojis = ['🌸', '🌺', '🌻', '🌷', '🌹', '💐', '🌼', '🏵️'];
+        
+        // Handle both touch and mouse events
+        garden.addEventListener('mousedown', handlePlant);
+        garden.addEventListener('touchstart', handlePlant);
+        
+        function handlePlant(e) {
+            if (e.target !== garden) return;
+            
+            e.preventDefault();
+            const x = e.clientX || e.touches[0].clientX;
+            const y = e.clientY || e.touches[0].clientY;
+            
+            plantFlower(x, y);
+        }
+        
+        function plantFlower(x, y) {
+            // Check if click is in grass area (bottom 40% of screen)
+            const grassStartY = window.innerHeight * 0.6;
+            
+            if (y < grassStartY) {
+                // Clicked in sky - spawn a cloud instead
+                spawnCloud(x, y);
+                return;
+            }
+            
+            const flower = document.createElement('div');
+            flower.className = 'flower';
+            
+            // Random flower emoji
+            const randomFlower = flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)];
+            flower.textContent = randomFlower;
+            
+            flower.style.left = (x - 24) + 'px'; // Center the emoji
+            flower.style.top = (y - 48) + 'px';  // Position above click point
+            
+            garden.appendChild(flower);
+            
+            // Add handlers to remove flower on interaction
+            flower.addEventListener('mousedown', removeFlower);
+            flower.addEventListener('touchstart', removeFlower);
+        }
+        
+        function removeFlower(e) {
+            e.stopPropagation();
+            this.classList.add('removing');
+            setTimeout(() => {
+                this.remove();
+            }, 400);
+        }
+        
+        function spawnCloud(x, y) {
+            const cloud = document.createElement('div');
+            cloud.className = 'cloud spawned-cloud';
+            cloud.textContent = '☁️';
+            cloud.style.position = 'absolute';
+            cloud.style.left = (x - 20) + 'px';  // Center the cloud emoji (40px / 2)
+            cloud.style.top = (y - 20) + 'px';   // Center vertically
+            cloud.style.fontSize = '40px';
+            cloud.style.opacity = '0';
+            cloud.style.pointerEvents = 'none';
+            cloud.style.userSelect = 'none';
+            
+            // Random animation duration between 60-100 seconds
+            const duration = 60 + Math.random() * 40;
+            cloud.style.animation = `cloudAppear 0.5s ease-out forwards, cloudDrift ${duration}s linear forwards`;
+            
+            garden.appendChild(cloud);
+            
+            // Remove cloud after it finishes drifting
+            setTimeout(() => {
+                cloud.remove();
+            }, duration * 1000);
+        }
+        
+        // Prevent default touch behaviors
+        document.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+    </script>
+</body>
+</html>
