@@ -61,6 +61,66 @@ Mobile meta tags are required in all apps:
 <meta name="mobile-web-app-capable" content="yes">
 ```
 
+### Back Button Pattern
+All sub-pages (not the root launcher) include a floating back button in the top-left corner for navigation:
+
+**HTML** (place immediately after `<body>` opening tag):
+```html
+<button id="back-btn" class="back-button" aria-label="Go back" title="Go back">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+</button>
+```
+
+**CSS** (add to `<style>` block):
+```css
+/* Back Button */
+.back-button {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.back-button:active {
+    transform: scale(0.9);
+}
+
+.back-button:hover {
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.back-button svg {
+    width: 24px;
+    height: 24px;
+    stroke: #333;
+}
+```
+
+**JavaScript** (add to `<script>` block):
+```javascript
+// Back button functionality
+document.getElementById('back-btn').addEventListener('click', () => {
+    window.history.back();
+});
+```
+
+The back button is shared across all sub-app pages with consistent styling. It uses `window.history.back()` for standard browser navigation, working both on mobile and desktop.
+
 ### Responsive Design Philosophy
 - Use `clamp()` for fluid typography: `font-size: clamp(2rem, 5vw, 3rem)`
 - Grid layouts with `auto-fit` for flexibility: `grid-template-columns: repeat(auto-fit, minmax(140px, 1fr))`
@@ -101,7 +161,8 @@ Reset `currentTime = 0` before playing to allow rapid repeated clicks.
 2. Create single `index.html` with all embedded content
 3. Add link to root [index.html](../index.html) launcher
 4. Include mobile meta tags and touch event handlers
-5. Test on actual mobile devices, not just responsive mode
+5. Include the back button (see [Back Button Pattern](#back-button-pattern)) to allow navigation back to the launcher
+6. Test on actual mobile devices, not just responsive mode
 
 ## Asset Management
 - **Audio files**: Store in app-specific `sounds/` subdirectory (see [animal-sounds/sounds/](../animal-sounds/sounds/))

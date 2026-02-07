@@ -76,7 +76,8 @@
             align-items: center;
             flex-wrap: wrap;
             width: 100%;
-            justify-content: space-between;
+            justify-content: center;
+            position: relative;
         }
 
         .toolbar-right {
@@ -84,6 +85,8 @@
             gap: 15px;
             align-items: center;
             flex-wrap: wrap;
+            position: absolute;
+            right: 0;
         }
 
         .toolbar-left {
@@ -116,6 +119,41 @@
             border-color: #ffeb3b;
             border-width: 4px;
             transform: scale(1.15);
+        }
+
+        /* Back Button */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .back-button:active {
+            transform: scale(0.9);
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-button svg {
+            width: 24px;
+            height: 24px;
+            stroke: #333;
         }
 
         .divider {
@@ -261,6 +299,11 @@
     </style>
 </head>
 <body>
+    <button id="back-btn" class="back-button" aria-label="Go back" title="Go back">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+    </button>
     <div id="container">
         <canvas id="canvas"></canvas>
         <div id="toolbar">
@@ -458,6 +501,11 @@
         clearBtn.addEventListener('touchstart', startClearTimer);
         clearBtn.addEventListener('touchend', cancelClearTimer);
         clearBtn.addEventListener('touchcancel', cancelClearTimer);
+
+        // Back button functionality
+        document.getElementById('back-btn').addEventListener('click', () => {
+            window.history.back();
+        });
     </script>
 </body>
 </html>

@@ -180,6 +180,41 @@
             animation-delay: -60s;
         }
 
+        /* Back Button */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .back-button:active {
+            transform: scale(0.9);
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-button svg {
+            width: 24px;
+            height: 24px;
+            stroke: #333;
+        }
+
         @media (max-width: 600px) {
             .flower {
                 animation: grow 0.6s ease-out forwards;
@@ -200,6 +235,11 @@
     </style>
 </head>
 <body>
+    <button id="back-btn" class="back-button" aria-label="Go back" title="Go back">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+    </button>
     <div id="garden">
         <div class="sun">☀️</div>
         <div class="cloud" style="top: 50px;">☁️</div>
@@ -234,16 +274,23 @@
         
         // Handle both touch and mouse events
         garden.addEventListener('mousedown', handlePlant);
-        garden.addEventListener('touchstart', handlePlant);
+        // Spawn flowers on touch release (touchend). Use changedTouches to get the final touch position.
+        garden.addEventListener('touchend', function(e) {
+            const t = e.changedTouches && e.changedTouches[0];
+            if (!t) return;
+            // Call handlePlant with a minimal synthetic event containing clientX/Y
+            handlePlant({ clientX: t.clientX, clientY: t.clientY, originalEvent: e });
+        });
         
         function handlePlant(e) {
-            if (e.target !== garden) return;
-            
-            e.preventDefault();
-            const x = e.clientX || e.touches[0].clientX;
-            const y = e.clientY || e.touches[0].clientY;
-            
-            plantFlower(x, y);
+            // Support mouse events (clientX/clientY) and synthetic touchend calls above.
+            const x = e.clientX;
+            const y = e.clientY;
+            if (typeof x !== 'number' || typeof y !== 'number') return;
+            const rect = garden.getBoundingClientRect();
+            const localX = x - rect.left;
+            const localY = y - rect.top;
+            plantFlower(localX, localY);
         }
         
         function plantFlower(x, y) {
@@ -309,6 +356,11 @@
         document.addEventListener('touchmove', function(e) {
             e.preventDefault();
         }, { passive: false });
+
+        // Back button functionality
+        document.getElementById('back-btn').addEventListener('click', () => {
+            window.history.back();
+        });
     </script>
 </body>
 </html>

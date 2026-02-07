@@ -120,6 +120,41 @@
             50% { transform: scale(1.05); }
         }
 
+        /* Back Button */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .back-button:active {
+            transform: scale(0.9);
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-button svg {
+            width: 24px;
+            height: 24px;
+            stroke: #333;
+        }
+
         @media (max-width: 600px) {
             .controls {
                 padding: 12px 15px;
@@ -139,6 +174,11 @@
     </style>
 </head>
 <body>
+    <button id="back-btn" class="back-button" aria-label="Go back" title="Go back">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+    </button>
     <canvas id="canvas"></canvas>
     
     <div class="controls">
@@ -148,6 +188,8 @@
         <button class="color-btn" data-color="#D5FFB5" style="background: #D5FFB5;"></button>
         <button class="color-btn" data-color="#E5B5FF" style="background: #E5B5FF;"></button>
         <button class="color-btn" data-color="#B5FFEE" style="background: #B5FFEE;"></button>
+        <button class="color-btn" data-color="#D2B48C" style="background: #D2B48C;"></button>
+        <button class="color-btn" data-color="#B0B0B0" style="background: #B0B0B0;"></button>
         <button class="clear-btn"><span>Clear</span></button>
     </div>
 
@@ -194,12 +236,25 @@
         const manifestURL = URL.createObjectURL(manifestBlob);
         document.getElementById('manifest').setAttribute('href', manifestURL);
 
-        // Color selection
+        // Color selection: use touchend on touch devices, click for mouse.
+        let lastTouchSelectTime = 0;
+        function selectColor(btn) {
+            colorButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentColor = btn.dataset.color;
+        }
+
         colorButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                colorButtons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentColor = btn.dataset.color;
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                selectColor(btn);
+                lastTouchSelectTime = Date.now();
+            }, {passive: false});
+
+            btn.addEventListener('click', (e) => {
+                // Ignore the synthetic click that often follows a touchend
+                if (Date.now() - lastTouchSelectTime < 700) return;
+                selectColor(btn);
             });
         });
 
@@ -271,13 +326,11 @@
 
         function startClear(e) {
             e.preventDefault();
-            clearBtnText.textContent = 'Hold...';
             clearBtn.classList.add('confirming');
             clearBtn.classList.add('progressing');
             
             clearTimer = setTimeout(() => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                clearBtnText.textContent = 'Cleared!';
                 clearBtn.classList.remove('progressing');
                 setTimeout(() => {
                     clearBtnText.textContent = 'Clear';
@@ -296,6 +349,11 @@
                 clearBtn.classList.remove('progressing');
             }
         }
+
+        // Back button functionality
+        document.getElementById('back-btn').addEventListener('click', () => {
+            window.history.back();
+        });
     </script>
 </body>
 </html>
