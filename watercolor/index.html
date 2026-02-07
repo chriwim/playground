@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#667eea">
+    <link rel="manifest" id="manifest">
+    <title>Watercolor Drawing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        #canvas {
+            display: block;
+            cursor: crosshair;
+            background: white;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .color-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid white;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .color-btn.active {
+            box-shadow: 0 0 0 4px #333;
+            transform: scale(1.15);
+        }
+
+        .clear-btn {
+            padding: 12px 24px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            margin-left: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .clear-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: width 0.1s linear;
+            z-index: 0;
+        }
+
+        .clear-btn.progressing::before {
+            width: 100%;
+            transition: width 2s linear;
+        }
+
+        .clear-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .clear-btn:hover:not(:disabled) {
+            background: #ff5252;
+            transform: scale(1.05);
+        }
+
+        .clear-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .clear-btn.confirming {
+            background: #ffa500;
+            animation: pulse 0.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @media (max-width: 600px) {
+            .controls {
+                padding: 12px 15px;
+                gap: 10px;
+            }
+
+            .color-btn {
+                width: 45px;
+                height: 45px;
+            }
+
+            .clear-btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div class="controls">
+        <button class="color-btn active" data-color="#FFB5C5" style="background: #FFB5C5;"></button>
+        <button class="color-btn" data-color="#B5D5FF" style="background: #B5D5FF;"></button>
+        <button class="color-btn" data-color="#FFE5B5" style="background: #FFE5B5;"></button>
+        <button class="color-btn" data-color="#D5FFB5" style="background: #D5FFB5;"></button>
+        <button class="color-btn" data-color="#E5B5FF" style="background: #E5B5FF;"></button>
+        <button class="color-btn" data-color="#B5FFEE" style="background: #B5FFEE;"></button>
+        <button class="clear-btn"><span>Clear</span></button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const colorButtons = document.querySelectorAll('.color-btn');
+        const clearBtn = document.querySelector('.clear-btn');
+        const clearBtnText = clearBtn.querySelector('span');
+
+        let currentColor = '#FFB5C5';
+        let isDrawing = false;
+        let clearTimer = null;
+        let lastX = 0;
+        let lastY = 0;
+
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // PWA Manifest
+        const manifest = {
+            "name": "Watercolor Drawing",
+            "short_name": "Watercolor",
+            "display": "standalone",
+            "orientation": "portrait-primary",
+            "start_url": "./",
+            "scope": "./",
+            "background_color": "#ffffff",
+            "theme_color": "#667eea",
+            "icons": [{
+                "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%23667eea' width='512' height='512'/%3E%3Cpath fill='%23ffffff' d='M256 100c-40 0-80 20-100 50l80 80 80-80c-20-30-60-50-100-50zm0 180c-40 60-120 140-160 180 20 10 40 10 60 0l100-100 100 100c20 10 40 10 60 0-40-40-120-120-160-180z'/%3E%3C/svg%3E",
+                "sizes": "512x512",
+                "type": "image/svg+xml",
+                "purpose": "any maskable"
+            }]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        document.getElementById('manifest').setAttribute('href', manifestURL);
+
+        // Color selection
+        colorButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                colorButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentColor = btn.dataset.color;
+            });
+        });
+
+        // Drawing functions
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getPosition(e);
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            e.preventDefault();
+            const pos = getPosition(e);
+
+            // Configure watercolor effect with large brush
+            ctx.lineWidth = 30;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.globalAlpha = 0.3;
+            ctx.strokeStyle = currentColor;
+            
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.globalAlpha = 1.0;
+        }
+
+        function getPosition(e) {
+            if (e.touches) {
+                return {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                };
+            }
+            return {
+                x: e.clientX,
+                y: e.clientY
+            };
+        }
+
+        // Mouse events
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // Touch events
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        // Clear button - hold for 2 seconds
+        clearBtn.addEventListener('mousedown', startClear);
+        clearBtn.addEventListener('touchstart', startClear);
+        clearBtn.addEventListener('mouseup', cancelClear);
+        clearBtn.addEventListener('mouseleave', cancelClear);
+        clearBtn.addEventListener('touchend', cancelClear);
+
+        function startClear(e) {
+            e.preventDefault();
+            clearBtnText.textContent = 'Hold...';
+            clearBtn.classList.add('confirming');
+            clearBtn.classList.add('progressing');
+            
+            clearTimer = setTimeout(() => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                clearBtnText.textContent = 'Cleared!';
+                clearBtn.classList.remove('progressing');
+                setTimeout(() => {
+                    clearBtnText.textContent = 'Clear';
+                    clearBtn.classList.remove('confirming');
+                }, 500);
+                clearTimer = null;
+            }, 2000);
+        }
+
+        function cancelClear(e) {
+            if (clearTimer) {
+                clearTimeout(clearTimer);
+                clearTimer = null;
+                clearBtnText.textContent = 'Clear';
+                clearBtn.classList.remove('confirming');
+                clearBtn.classList.remove('progressing');
+            }
+        }
+    </script>
+</body>
+</html>
