@@ -272,14 +272,32 @@
         const garden = document.getElementById('garden');
         const flowerEmojis = ['🌸', '🌺', '🌻', '🌷', '🌹', '💐', '🌼', '🏵️'];
         
-        // Handle both touch and mouse events
-        garden.addEventListener('mousedown', handlePlant);
-        // Spawn flowers on touch release (touchend). Use changedTouches to get the final touch position.
-        garden.addEventListener('touchend', function(e) {
-            const t = e.changedTouches && e.changedTouches[0];
-            if (!t) return;
-            // Call handlePlant with a minimal synthetic event containing clientX/Y
-            handlePlant({ clientX: t.clientX, clientY: t.clientY, originalEvent: e });
+        // Use Pointer Events to unify mouse/touch/pen and avoid duplicate events
+        // Suppress rapid duplicate plants using a short timestamp + distance check
+        let lastPlant = { time: 0, x: 0, y: 0 };
+        const PLANT_SUPPRESSION_MS = 300; // milliseconds
+        const PLANT_SUPPRESSION_DIST = 30; // pixels
+
+        garden.addEventListener('pointerup', function(e) {
+            // Only handle primary pointers
+            if (e.isPrimary === false) return;
+
+            const now = Date.now();
+            const dx = e.clientX - lastPlant.x;
+            const dy = e.clientY - lastPlant.y;
+            const dist = Math.hypot(dx, dy);
+
+            if (now - lastPlant.time < PLANT_SUPPRESSION_MS && dist < PLANT_SUPPRESSION_DIST) {
+                // Probably a duplicate event from the same touch — ignore
+                return;
+            }
+
+            lastPlant.time = now;
+            lastPlant.x = e.clientX;
+            lastPlant.y = e.clientY;
+
+            // Call handlePlant with client coords
+            handlePlant({ clientX: e.clientX, clientY: e.clientY, originalEvent: e });
         });
         
         function handlePlant(e) {
@@ -315,9 +333,8 @@
             
             garden.appendChild(flower);
             
-            // Add handlers to remove flower on interaction
-            flower.addEventListener('mousedown', removeFlower);
-            flower.addEventListener('touchstart', removeFlower);
+            // Add pointer handler to remove flower on interaction (works for touch/mouse/pen)
+            flower.addEventListener('pointerdown', removeFlower);
         }
         
         function removeFlower(e) {
